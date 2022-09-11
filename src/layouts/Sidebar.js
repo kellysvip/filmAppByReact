@@ -1,62 +1,77 @@
 import * as React from "react";
+import Box from "@mui/material/Box";
+import Drawer from "@mui/material/Drawer";
 import List from "@mui/material/List";
+import Divider from "@mui/material/Divider";
 import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
+import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
-import Checkbox from "@mui/material/Checkbox";
-import { Typography } from "@mui/material";
+import InboxIcon from "@mui/icons-material/MoveToInbox";
+import MailIcon from "@mui/icons-material/Mail";
 import useAuth from "../hooks/useAuth";
-import { useState } from "react";
+import FavoriteIcon from "@mui/icons-material/Favorite";
 const Sidebar = () => {
   const auth = useAuth();
-  const [checked, setChecked] = useState([1]);
- const handleClick = (value) => {
-  auth.setSearch(value)
-  checked === "" ? auth.setIsSearch(false) : auth.setIsSearch(true);
- }
-  const handleToggle = (value) => () => {
-    const currentIndex = checked.indexOf(value);
-    const newChecked = [...checked];
+  let anchor = "left";
+  let listFilm = ["Favorite"];
 
-    if (currentIndex === -1) {
-      newChecked.push(value);
-    } else {
-      newChecked.splice(currentIndex, 1);
+  const toggleDrawer = (anchor, open) => (event) => {
+    if (
+      event.type === "keydown" &&
+      (event.key === "Tab" || event.key === "Shift")
+    ) {
+      return;
     }
-
-    setChecked(newChecked);
+    auth.setOpenSideBar({ ...auth.openSideBar, [anchor]: open });
   };
 
-  return (
-    <List
-      dense
-      sx={{ width: "100%", maxWidth: 150, bgcolor: "background.paper" }}
+  const list = (anchor) => (
+    <Box
+      sx={{ width: anchor === "top" || anchor === "bottom" ? "auto" : 250 }}
+      role="presentation"
+      onClick={toggleDrawer(anchor, false)}
+      onKeyDown={toggleDrawer(anchor, false)}
     >
-      <Typography>Your Favorite Type</Typography>
-      {auth.genres?.slice(0, 10).map((value, index) => {
-        const labelId = `checkbox-list-secondary-label-${value}`;
-        return (
-          <ListItem
-            key={value.id}
-            secondaryAction={
-              <Checkbox
-                edge="end"
-                onChange={handleToggle(value)}
-                checked={checked.indexOf(value) !== -1}
-                inputProps={{ "aria-labelledby": labelId }}
-                key={value.name}
-                onClick={() => handleClick(value.name)}
-              />
-            }
-            disablePadding
-          >
-            <ListItemButton key={value.id}>
-              <ListItemText key={index} id={labelId} primary={value.name} />
+      <List>
+        {listFilm.map((text, index) => (
+          <ListItem key={text} disablePadding>
+            <ListItemButton>
+              <FavoriteIcon />
+              <ListItemText primary={text} />
+              <ListItemText primary={auth.items} />
             </ListItemButton>
           </ListItem>
-        );
-      })}
-    </List>
+        ))}
+      </List>
+      <Divider />
+      <List>
+        {["All mail", "Trash", "Spam"].map((text, index) => (
+          <ListItem key={text} disablePadding>
+            <ListItemButton>
+              <ListItemIcon>
+                {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
+              </ListItemIcon>
+              <ListItemText primary={text} />
+            </ListItemButton>
+          </ListItem>
+        ))}
+      </List>
+    </Box>
+  );
+
+  return (
+    <div>
+      <React.Fragment>
+        <Drawer
+          anchor={anchor}
+          open={auth.openSideBar[anchor]}
+          onClose={toggleDrawer(anchor, false)}
+        >
+          {list(anchor)}
+        </Drawer>
+      </React.Fragment>
+    </div>
   );
 };
 

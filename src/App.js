@@ -38,12 +38,29 @@ function Copyright() {
 function App() {
   const [isLogged, setIsLogged] = useState(false);
   const [response, setResponse] = useState();
-  const [genres, setGenres] = useState();
+
   const [page, setPage] = useState(1);
   const [openModalDetailPage, setOpenModalDetailPage] = useState(false);
   const [openLoginPage, setOpenLoginPage] = useState(false);
   const [search, setSearch] = useState("action");
   const [isSearch, setIsSearch] = useState(false);
+  const [openSideBar, setOpenSideBar] = useState({
+    left: false,
+  });
+  const [username, setUsername] = useState("");
+  const [items, setItems] = useState([]);
+
+  React.useEffect(() => {
+    localStorage.setItem("items", JSON.stringify(items));
+  }, [items]);
+
+  React.useEffect(() => {
+    const items = JSON.parse(localStorage.getItem("items"));
+    if (items) {
+      setItems(items);
+    }
+  }, []);
+
   useEffect(() => {
     const renderFilmCard = async () => {
       try {
@@ -62,23 +79,6 @@ function App() {
 
     renderFilmCard();
   }, [page, search, isSearch]);
-  useEffect(() => {
-    const renderGenres = async () => {
-      try {
-        const gen = await (
-          await fetch(
-            "https://api.themoviedb.org/3/genre/movie/list?api_key=d509fe4d4236b8713217df3940b553b4&language=en-US"
-          )
-        ).json();
-        // console.log("genres: ", gen.genres);
-        setGenres(gen.genres);
-      } catch (error) {
-        console.log("Failed", error);
-      }
-    };
-
-    renderGenres();
-  }, []);
   Copyright();
   return (
     <ThemeProvider theme={darkTheme}>
@@ -88,7 +88,6 @@ function App() {
           BASE_URL,
           page,
           setPage,
-          genres,
           setOpenModalDetailPage,
           openModalDetailPage,
           setSearch,
@@ -97,14 +96,16 @@ function App() {
           setOpenLoginPage,
           isLogged,
           setIsLogged,
+          openSideBar,
+          setOpenSideBar,
+          username,
+          setUsername,
+          items,
+          setItems,
         }}
       >
         <CssBaseline />
-        <Typography component={"span"} variant={"body2"}>
-          <Header />
-        </Typography>
-        <br />
-        <PaginationRounded />
+        <Header />
         <Box sx={{ display: "flex" }}>
           <Sidebar />
           <Grid container spacing={0}>
@@ -114,7 +115,7 @@ function App() {
                 item
                 xs={12}
                 md={6}
-                lg={4}
+                lg={3}
                 sx={{ display: "flex", mt: 2 }}
               >
                 <FilmCard key={film.id} id={film.id} film={film} />

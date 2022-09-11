@@ -23,7 +23,7 @@ const LoginPage = () => {
 
   const LoginSchema = Yup.object().shape({
     username: Yup.string().required("Username is required"),
-    password: Yup.string().required("Password is required")
+    password: Yup.string().required("Password is required"),
   });
 
   const methods = useForm({
@@ -31,16 +31,15 @@ const LoginPage = () => {
     defaultValues,
   });
 
-  
   const { handleSubmit } = methods;
 
   const onSubmit = (data) => {
     // let from = location.state?.from?.pathname || "/";
     // let username = data.username;
-    console.log(data)
-    auth.setIsLogged(true)
+    console.log(data);
+    auth.setUsername(data.username);
+    auth.setIsLogged(true);
     navigate("/");
-    
   };
   const handleClose = () => {
     auth.setOpenLoginPage(false);

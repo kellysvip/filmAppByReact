@@ -6,10 +6,14 @@ import Typography from "@mui/material/Typography";
 import { CardActionArea } from "@mui/material";
 import useAuth from "../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
-
+import StarBorderIcon from "@mui/icons-material/StarBorder";
+import StarIcon from "@mui/icons-material/Star";
+import { useState } from "react";
 export default function FilmCard({ film, id }) {
   const auth = useAuth();
   const navigate = useNavigate();
+  const [colorStar, setColorStar] = useState(false);
+
   const handleOpen = () => {
     if (auth.isLogged) {
       navigate(`/detail/${id}`);
@@ -18,20 +22,65 @@ export default function FilmCard({ film, id }) {
       navigate(`/login`);
     }
   };
+  const handleFavorite = () => {
+    if (colorStar) {
+      setColorStar(false);
+    } else {
+      setColorStar(true);
+      auth.setItems(film.title);
+      console.log(film.title);
+    }
+  };
+
   return (
-    <Card onClick={handleOpen} sx={{ maxWidth: 345 }}>
+    <Card sx={{ width: 345 }}>
       <CardActionArea>
         <CardMedia
           component="img"
           height="140"
           image={"https://image.tmdb.org/t/p/w500/" + film.poster_path}
-          alt="green iguana"
+          alt="error from api"
+          onClick={handleOpen}
         />
         <CardContent>
-          <Typography gutterBottom variant="h5" component="div">
+          {colorStar ? (
+            <StarIcon
+              onClick={handleFavorite}
+              sx={{
+                position: "absolute",
+                color: "#fff",
+                zIndex: 20,
+                left: "300px",
+                top: "160px",
+              }}
+            />
+          ) : (
+            <StarBorderIcon
+              onClick={handleFavorite}
+              sx={{
+                position: "absolute",
+                color: "#fff",
+                zIndex: 20,
+                left: "300px",
+                top: "160px",
+              }}
+            />
+          )}
+
+          <Typography
+            onClick={handleOpen}
+            gutterBottom
+            variant="h5"
+            component="div"
+          >
             {film.title}
           </Typography>
-          <Typography variant="body2" color="text.secondary">
+
+          <Typography
+            onClick={handleOpen}
+            variant="body2"
+            color="text.secondary"
+          >
             {film.overview?.slice(0, 200).trim() + "..."}
           </Typography>
         </CardContent>

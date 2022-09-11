@@ -17,6 +17,8 @@ import MoreIcon from "@mui/icons-material/MoreVert";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../contexts/AuthContexts";
 import { useContext } from "react";
+import HeaderMenu from "./HeaderMenu";
+import HomeIcon from "@mui/icons-material/Home";
 
 const Search = styled("div")(({ theme }) => ({
   position: "relative",
@@ -32,16 +34,6 @@ const Search = styled("div")(({ theme }) => ({
     marginLeft: theme.spacing(3),
     width: "auto",
   },
-}));
-
-const SearchIconWrapper = styled("div")(({ theme }) => ({
-  padding: theme.spacing(0, 2),
-  height: "100%",
-  position: "absolute",
-  pointerEvents: "none",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
 }));
 
 const StyledInputBase = styled(InputBase)(({ theme }) => ({
@@ -67,19 +59,53 @@ function Header() {
 
   const isMenuOpen = Boolean(anchorEl);
   const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
+  let searchHD = "";
   const handleSearch = (e) => {
-    auth.setSearch(e.target.value);
-    e.target.value === "" ? auth.setIsSearch(false) : auth.setIsSearch(true);
-    console.log(e.target.value);
+    searchHD = e.target.value;
   };
 
-  const handleProfileMenuOpen = (event) => {
-    // setAnchorEl(event.currentTarget);
-    
-    if (!auth.isLogged){
-      auth.setOpenLoginPage(true)
-    console.log('login', auth.openLoginPage)
-    navigate("/login");
+  const handleClickSearch = () => {
+    if (searchHD === "") {
+      return;
+    }
+    auth.setSearch(searchHD);
+    auth.setIsSearch(true);
+  };
+  let anchor = "left";
+  let firstList = [
+    "Action",
+    "Adventure",
+    "Comedy",
+    "Anime",
+    "Crime",
+    "Drama",
+    "Documentary",
+    "Family",
+    "History",
+    "Fantasy",
+    "Mystery",
+    "Romance",
+    "TV Movie",
+    "America",
+  ];
+
+  let secondList = [
+    "VietNam",
+    "America",
+    "Korea",
+    "England",
+    "China",
+    "ThaiLand",
+    "Japanese",
+  ];
+
+  const handleProfileMenuOpen = () => {
+    if (!auth.isLogged) {
+      auth.setOpenLoginPage(true);
+      console.log("login", auth.openLoginPage);
+      navigate("/login");
+    } else {
+      auth.setIsLogged(false);
     }
   };
 
@@ -136,6 +162,7 @@ function Header() {
       onClose={handleMobileMenuClose}
     >
       <MenuItem>
+        <HeaderMenu nameList={"Thể Loại"} lists={firstList} />
         <IconButton
           size="large"
           aria-label="show 17 new notifications"
@@ -157,19 +184,19 @@ function Header() {
         >
           <AccountCircle />
         </IconButton>
-        <p>Profile</p>
+        {auth.isLogged ? <p>{auth.username}</p> : <p>Profile</p>}
       </MenuItem>
     </Menu>
   );
 
+  const handleOpenSideBar = () => {
+    console.log("click");
+    auth.setOpenSideBar({ ...auth.openSideBar, [anchor]: "open" });
+  };
 
-  // const handleClick = (event) => {
-  //   setMenu(event.currentTarget);
-  // };
-  // const handleClose = () => {
-  //   setMenu(null);
-  // };
-
+  const handleHome = () => {
+    auth.setIsSearch(false);
+  };
   return (
     <Box sx={{ flexGrow: 1 }}>
       <AppBar sx={{ position: "static" }}>
@@ -180,6 +207,7 @@ function Header() {
             color="inherit"
             aria-label="open drawer"
             sx={{ mr: 2 }}
+            onClick={handleOpenSideBar}
           >
             <MenuIcon />
           </IconButton>
@@ -191,18 +219,51 @@ function Header() {
           >
             Phimmoizzz.com
           </Typography>
-          <Search>
-            <SearchIconWrapper>
-              <SearchIcon />
-            </SearchIconWrapper>
+
+          <Search
+            sx={{
+              maxWidth: "500px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
             <StyledInputBase
               placeholder="Search…"
               inputProps={{ "aria-label": "search" }}
               onChange={handleSearch}
+              sx={{ flexGrow: 1, maxWidth: "500px" }}
             />
+            <IconButton
+              size="large"
+              aria-label="account of current user"
+              aria-controls="primary-search-account-menu"
+              aria-haspopup="true"
+              color="inherit"
+            >
+              <SearchIcon onClick={handleClickSearch} />
+            </IconButton>
           </Search>
+          <Box sx={{ display: { xs: "none", sm: "flex" } }}>
+            <HeaderMenu nameList={"Thể Loại"} lists={firstList} />
+          </Box>
+
+          <Box sx={{ display: { xs: "none", md: "flex", sm: "none" }, ml: 2 }}>
+            <HeaderMenu nameList={"Quốc Gia"} lists={secondList} />
+          </Box>
 
           <Box sx={{ flexGrow: 1 }} />
+
+          <IconButton
+            size="large"
+            aria-label="account of current user"
+            aria-controls="primary-search-account-menu"
+            aria-haspopup="true"
+            color="inherit"
+          >
+            <HomeIcon onClick={handleHome} />
+          </IconButton>
+
           <Box sx={{ display: { xs: "none", md: "flex" } }}>
             <IconButton
               size="large"
@@ -210,7 +271,7 @@ function Header() {
               color="inherit"
             >
               <Badge badgeContent={17} color="error">
-                <NotificationsIcon /> 
+                <NotificationsIcon />
               </Badge>
             </IconButton>
             <IconButton
@@ -222,7 +283,8 @@ function Header() {
               onClick={handleProfileMenuOpen}
               color="inherit"
             >
-              <AccountCircle /> {auth.isLogged && <Typography>Have a good Time</Typography>}
+              <AccountCircle />{" "}
+              {auth.isLogged && <Typography>Hello {auth.username}</Typography>}
             </IconButton>
           </Box>
           <Box sx={{ display: { xs: "flex", md: "none" } }}>
